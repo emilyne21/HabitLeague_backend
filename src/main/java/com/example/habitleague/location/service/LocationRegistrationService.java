@@ -78,19 +78,29 @@ public class LocationRegistrationService {
         log.debug("Buscando ubicación registrada para usuario {} y challenge {}", userId, challengeId);
         
         try {
-            // Verificar si existe la ubicación
-            Optional<RegisteredLocation> locationOpt = registeredLocationRepository
+            // Primero intentar obtener la ubicación del usuario para este challenge
+            Optional<RegisteredLocation> userLocationOpt = registeredLocationRepository
                     .findByUserIdAndChallengeId(userId, challengeId);
             
-            if (locationOpt.isEmpty()) {
-                log.warn("No se encontró ubicación registrada para usuario {} y challenge {}", userId, challengeId);
-                throw new ChallengeException("Ubicación registrada no encontrada");
+            if (userLocationOpt.isPresent()) {
+                RegisteredLocation location = userLocationOpt.get();
+                log.debug("Ubicación del usuario encontrada con ID: {}", location.getId());
+                return convertToResponse(location);
             }
             
-            RegisteredLocation location = locationOpt.get();
-            log.debug("Ubicación encontrada con ID: {}", location.getId());
+            // Si no se encuentra la ubicación del usuario, intentar obtener la ubicación del creador
+            log.debug("Ubicación del usuario no encontrada, buscando ubicación del creador para challenge {}", challengeId);
+            Optional<RegisteredLocation> creatorLocationOpt = getCreatorLocationByChallenge(challengeId);
             
-            return convertToResponse(location);
+            if (creatorLocationOpt.isPresent()) {
+                RegisteredLocation creatorLocation = creatorLocationOpt.get();
+                log.debug("Ubicación del creador encontrada con ID: {}", creatorLocation.getId());
+                return convertToResponse(creatorLocation);
+            }
+            
+            // Si no se encuentra ninguna ubicación, lanzar excepción
+            log.warn("No se encontró ubicación registrada para usuario {} ni creador del challenge {}", userId, challengeId);
+            throw new ChallengeException("Ubicación registrada no encontrada");
             
         } catch (ChallengeException e) {
             // Re-lanzar ChallengeException para manejo específico en el controlador
@@ -172,7 +182,7 @@ public class LocationRegistrationService {
                 .build();
     }
 
-    private LocationRegistrationResponse convertToResponse(RegisteredLocation location) {
+    public LocationRegistrationResponse convertToResponse(RegisteredLocation location) {
         return LocationRegistrationResponse.builder()
                 .registrationId(location.getId())
                 .latitude(location.getLatitude())

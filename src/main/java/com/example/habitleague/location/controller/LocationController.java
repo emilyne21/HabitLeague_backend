@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import com.example.habitleague.location.model.RegisteredLocation;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/location")
@@ -59,6 +61,35 @@ public class LocationController {
         } catch (Exception e) {
             log.error("Error interno obteniendo ubicación registrada para challenge {} y usuario {}: {}", 
                     challengeId, user.getEmail(), e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/challenge/{challengeId}/creator")
+    @Transactional(readOnly = true)
+    public ResponseEntity<LocationRegistrationResponse> getCreatorLocationByChallenge(
+            @PathVariable Long challengeId) {
+        
+        log.debug("Solicitando ubicación del creador para challenge {}", challengeId);
+        
+        try {
+            Optional<RegisteredLocation> creatorLocation = 
+                    locationRegistrationService.getCreatorLocationByChallenge(challengeId);
+            
+            if (creatorLocation.isPresent()) {
+                LocationRegistrationResponse response = 
+                        locationRegistrationService.convertToResponse(creatorLocation.get());
+                log.debug("Ubicación del creador encontrada para challenge {}: {}", 
+                        challengeId, response.getLocationName());
+                return ResponseEntity.ok(response);
+            } else {
+                log.warn("No se encontró ubicación del creador para challenge {}", challengeId);
+                return ResponseEntity.notFound().build();
+            }
+            
+        } catch (Exception e) {
+            log.error("Error interno obteniendo ubicación del creador para challenge {}: {}", 
+                    challengeId, e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
     }
