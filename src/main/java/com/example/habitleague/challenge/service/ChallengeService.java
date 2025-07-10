@@ -215,6 +215,30 @@ public class ChallengeService {
         return challengeMemberRepository.findByUserWithChallengeAndCreator(user);
     }
 
+    /**
+     * Obtiene challenges populares con información de ubicación del creador
+     */
+    @Transactional(readOnly = true)
+    public List<Challenge> getPopularChallengesWithLocation(int limit) {
+        return challengeRepository.findPopularChallenges(PageRequest.of(0, limit));
+    }
+
+    /**
+     * Obtiene challenges por categoría con información de ubicación del creador
+     */
+    @Transactional(readOnly = true)
+    public List<Challenge> getChallengesByCategoryWithLocation(ChallengeCategory category) {
+        return challengeRepository.findByCategory(category);
+    }
+
+    /**
+     * Obtiene challenges destacados con información de ubicación del creador
+     */
+    @Transactional(readOnly = true)
+    public List<Challenge> getFeaturedChallengesWithLocation() {
+        return challengeRepository.findFeaturedChallenges();
+    }
+
     private boolean isValidDurationDays(Integer durationDays) {
         return durationDays >= 21 && durationDays <= 365;
     }

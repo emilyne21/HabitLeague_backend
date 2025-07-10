@@ -22,6 +22,13 @@ public class ChallengeSummaryResponse {
     private Boolean featured;
     private LocalDate startDate;
     private LocalDate endDate;
+    
+    // Campos de ubicación
+    private Double latitude;
+    private Double longitude;
+    private String address;
+    private String locationName;
+    private Double toleranceRadius;
 
     public static ChallengeSummaryResponse fromChallenge(Challenge challenge) {
         return ChallengeSummaryResponse.builder()
@@ -36,6 +43,28 @@ public class ChallengeSummaryResponse {
                 .featured(challenge.getFeatured())
                 .startDate(challenge.getStartDate())
                 .endDate(challenge.getEndDate())
+                .build();
+    }
+    
+    public static ChallengeSummaryResponse fromChallengeWithLocation(Challenge challenge, 
+            Double latitude, Double longitude, String address, String locationName, Double toleranceRadius) {
+        return ChallengeSummaryResponse.builder()
+                .id(challenge.getId())
+                .name(challenge.getName())
+                .description(challenge.getDescription())
+                .category(challenge.getCategory())
+                .imageUrl(challenge.getImageUrl())
+                .durationDays(challenge.getDurationDays())
+                .entryFee(challenge.getEntryFee())
+                .participantCount(challenge.getMembers() != null ? challenge.getMembers().size() : 0)
+                .featured(challenge.getFeatured())
+                .startDate(challenge.getStartDate())
+                .endDate(challenge.getEndDate())
+                .latitude(latitude)
+                .longitude(longitude)
+                .address(address)
+                .locationName(locationName)
+                .toleranceRadius(toleranceRadius)
                 .build();
     }
 } 

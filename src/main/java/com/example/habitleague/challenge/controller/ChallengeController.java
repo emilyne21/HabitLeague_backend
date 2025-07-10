@@ -164,7 +164,23 @@ public class ChallengeController {
     public ResponseEntity<List<ChallengeSummaryResponse>> getFeaturedChallenges() {
         List<Challenge> challenges = challengeService.getFeaturedChallenges();
         List<ChallengeSummaryResponse> response = challenges.stream()
-                .map(ChallengeSummaryResponse::fromChallenge)
+                .map(challenge -> {
+                    // Obtener ubicación del creador
+                    var creatorLocation = locationRegistrationService.getCreatorLocationByChallenge(challenge.getId());
+                    if (creatorLocation.isPresent()) {
+                        var location = creatorLocation.get();
+                        return ChallengeSummaryResponse.fromChallengeWithLocation(
+                                challenge,
+                                location.getLatitude(),
+                                location.getLongitude(),
+                                location.getAddress(),
+                                location.getLocationName(),
+                                location.getToleranceRadius()
+                        );
+                    } else {
+                        return ChallengeSummaryResponse.fromChallenge(challenge);
+                    }
+                })
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
@@ -175,7 +191,23 @@ public class ChallengeController {
             @RequestParam(defaultValue = "10") int limit) {
         List<Challenge> challenges = challengeService.getPopularChallenges(limit);
         List<ChallengeSummaryResponse> response = challenges.stream()
-                .map(ChallengeSummaryResponse::fromChallenge)
+                .map(challenge -> {
+                    // Obtener ubicación del creador
+                    var creatorLocation = locationRegistrationService.getCreatorLocationByChallenge(challenge.getId());
+                    if (creatorLocation.isPresent()) {
+                        var location = creatorLocation.get();
+                        return ChallengeSummaryResponse.fromChallengeWithLocation(
+                                challenge,
+                                location.getLatitude(),
+                                location.getLongitude(),
+                                location.getAddress(),
+                                location.getLocationName(),
+                                location.getToleranceRadius()
+                        );
+                    } else {
+                        return ChallengeSummaryResponse.fromChallenge(challenge);
+                    }
+                })
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
@@ -186,7 +218,23 @@ public class ChallengeController {
             @PathVariable ChallengeCategory category) {
         List<Challenge> challenges = challengeService.getChallengesByCategory(category);
         List<ChallengeSummaryResponse> response = challenges.stream()
-                .map(ChallengeSummaryResponse::fromChallenge)
+                .map(challenge -> {
+                    // Obtener ubicación del creador
+                    var creatorLocation = locationRegistrationService.getCreatorLocationByChallenge(challenge.getId());
+                    if (creatorLocation.isPresent()) {
+                        var location = creatorLocation.get();
+                        return ChallengeSummaryResponse.fromChallengeWithLocation(
+                                challenge,
+                                location.getLatitude(),
+                                location.getLongitude(),
+                                location.getAddress(),
+                                location.getLocationName(),
+                                location.getToleranceRadius()
+                        );
+                    } else {
+                        return ChallengeSummaryResponse.fromChallenge(challenge);
+                    }
+                })
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
@@ -223,18 +271,93 @@ public class ChallengeController {
             Map.of(
                 ChallengeCategory.MINDFULNESS, 
                 challengeService.getChallengesByCategory(ChallengeCategory.MINDFULNESS)
-                    .stream().map(ChallengeSummaryResponse::fromChallenge).collect(Collectors.toList()),
+                    .stream().map(challenge -> {
+                        var creatorLocation = locationRegistrationService.getCreatorLocationByChallenge(challenge.getId());
+                        if (creatorLocation.isPresent()) {
+                            var location = creatorLocation.get();
+                            return ChallengeSummaryResponse.fromChallengeWithLocation(
+                                    challenge,
+                                    location.getLatitude(),
+                                    location.getLongitude(),
+                                    location.getAddress(),
+                                    location.getLocationName(),
+                                    location.getToleranceRadius()
+                            );
+                        } else {
+                            return ChallengeSummaryResponse.fromChallenge(challenge);
+                        }
+                    }).collect(Collectors.toList()),
                 ChallengeCategory.FITNESS,
                 challengeService.getChallengesByCategory(ChallengeCategory.FITNESS)
-                    .stream().map(ChallengeSummaryResponse::fromChallenge).collect(Collectors.toList()),
+                    .stream().map(challenge -> {
+                        var creatorLocation = locationRegistrationService.getCreatorLocationByChallenge(challenge.getId());
+                        if (creatorLocation.isPresent()) {
+                            var location = creatorLocation.get();
+                            return ChallengeSummaryResponse.fromChallengeWithLocation(
+                                    challenge,
+                                    location.getLatitude(),
+                                    location.getLongitude(),
+                                    location.getAddress(),
+                                    location.getLocationName(),
+                                    location.getToleranceRadius()
+                            );
+                        } else {
+                            return ChallengeSummaryResponse.fromChallenge(challenge);
+                        }
+                    }).collect(Collectors.toList()),
                 ChallengeCategory.PRODUCTIVITY,
                 challengeService.getChallengesByCategory(ChallengeCategory.PRODUCTIVITY)
-                    .stream().map(ChallengeSummaryResponse::fromChallenge).collect(Collectors.toList())
+                    .stream().map(challenge -> {
+                        var creatorLocation = locationRegistrationService.getCreatorLocationByChallenge(challenge.getId());
+                        if (creatorLocation.isPresent()) {
+                            var location = creatorLocation.get();
+                            return ChallengeSummaryResponse.fromChallengeWithLocation(
+                                    challenge,
+                                    location.getLatitude(),
+                                    location.getLongitude(),
+                                    location.getAddress(),
+                                    location.getLocationName(),
+                                    location.getToleranceRadius()
+                            );
+                        } else {
+                            return ChallengeSummaryResponse.fromChallenge(challenge);
+                        }
+                    }).collect(Collectors.toList())
             );
 
         DiscoverResponse response = DiscoverResponse.builder()
-                .featured(featured.stream().map(ChallengeSummaryResponse::fromChallenge).collect(Collectors.toList()))
-                .popular(popular.stream().map(ChallengeSummaryResponse::fromChallenge).collect(Collectors.toList()))
+                .featured(featured.stream().map(challenge -> {
+                    var creatorLocation = locationRegistrationService.getCreatorLocationByChallenge(challenge.getId());
+                    if (creatorLocation.isPresent()) {
+                        var location = creatorLocation.get();
+                        return ChallengeSummaryResponse.fromChallengeWithLocation(
+                                challenge,
+                                location.getLatitude(),
+                                location.getLongitude(),
+                                location.getAddress(),
+                                location.getLocationName(),
+                                location.getToleranceRadius()
+                        );
+                    } else {
+                        return ChallengeSummaryResponse.fromChallenge(challenge);
+                    }
+                }).collect(Collectors.toList()))
+                .popular(popular.stream().map(challenge -> {
+                    var creatorLocation = locationRegistrationService.getCreatorLocationByChallenge(challenge.getId());
+                    if (creatorLocation.isPresent()) {
+                        var location = creatorLocation.get();
+                        return ChallengeSummaryResponse.fromChallengeWithLocation(
+                                challenge,
+                                location.getLatitude(),
+                                location.getLongitude(),
+                                location.getAddress(),
+                                location.getLocationName(),
+                                location.getToleranceRadius()
+                        );
+                    } else {
+                        return ChallengeSummaryResponse.fromChallenge(challenge);
+                    }
+                }).collect(Collectors.toList()))
                 .byCategory(byCategory)
                 .build();
 

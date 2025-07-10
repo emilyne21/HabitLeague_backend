@@ -110,24 +110,61 @@ public class LocationRegistrationService {
                 .orElseThrow(() -> new ChallengeException("No hay ubicación registrada para este miembro"));
     }
 
-    private RegisteredLocation simulateLocationRegistration(LocationRegistrationRequest request, ChallengeMember challengeMember) {
-        // Simular obtención de dirección desde Google Maps
-        String simulatedAddress = SAMPLE_ADDRESSES[random.nextInt(SAMPLE_ADDRESSES.length)];
+    /**
+     * Obtiene la ubicación registrada del creador de un challenge
+     */
+    @Transactional(readOnly = true)
+    public Optional<RegisteredLocation> getCreatorLocationByChallenge(Long challengeId) {
+        log.debug("Buscando ubicación del creador para challenge {}", challengeId);
         
-        // Usar el nombre proporcionado o generar uno aleatorio
+        try {
+            // Buscar la ubicación del creador del challenge
+            Optional<RegisteredLocation> locationOpt = registeredLocationRepository
+                    .findByChallengeId(challengeId)
+                    .stream()
+                    .filter(location -> location.getChallengeMember().getUser().getId()
+                            .equals(location.getChallengeMember().getChallenge().getCreatedBy().getId()))
+                    .findFirst();
+            
+            if (locationOpt.isPresent()) {
+                log.debug("Ubicación del creador encontrada para challenge {}: {}", 
+                        challengeId, locationOpt.get().getLocationName());
+            } else {
+                log.debug("No se encontró ubicación del creador para challenge {}", challengeId);
+            }
+            
+            return locationOpt;
+            
+        } catch (Exception e) {
+            log.error("Error obteniendo ubicación del creador para challenge {}: {}", 
+                    challengeId, e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    private RegisteredLocation simulateLocationRegistration(LocationRegistrationRequest request, ChallengeMember challengeMember) {
+        // Usar la dirección real proporcionada por el usuario
+        String address = request.getAddress() != null ? 
+            request.getAddress() : 
+            "Dirección no especificada";
+        
+        // Usar el nombre proporcionado o generar uno descriptivo
         String locationName = request.getLocationName() != null ? 
             request.getLocationName() : 
-            SAMPLE_LOCATION_NAMES[random.nextInt(SAMPLE_LOCATION_NAMES.length)];
+            "Ubicación del Challenge";
 
         // Usar radio de tolerancia proporcionado o default de 100m
         Double toleranceRadius = request.getToleranceRadius() != null ? 
             request.getToleranceRadius() : 
             100.0;
 
+        log.info("Registrando ubicación real: lat={}, lng={}, address={}, name={}", 
+                request.getLatitude(), request.getLongitude(), address, locationName);
+
         return RegisteredLocation.builder()
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
-                .address(simulatedAddress)
+                .address(address)
                 .locationName(locationName)
                 .registeredAt(LocalDateTime.now())
                 .toleranceRadius(toleranceRadius)

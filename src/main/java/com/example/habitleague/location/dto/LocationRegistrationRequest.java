@@ -21,6 +21,7 @@ public class LocationRegistrationRequest {
     @DecimalMax(value = "180.0", message = "La longitud debe estar entre -180 y 180")
     private Double longitude;
 
+    private String address; // Dirección real proporcionada por el usuario
     private String locationName; // Nombre del lugar proporcionado por el usuario
     private Double toleranceRadius; // Radio de tolerancia en metros (default: 100m)
 } 
