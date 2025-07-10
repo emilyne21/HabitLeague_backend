@@ -3,7 +3,7 @@ WORKDIR /app
 
 
 COPY target/*.jar app.jar
-COPY ../../habitback/Habitleague/.env .
+
 
 EXPOSE 8080
 
