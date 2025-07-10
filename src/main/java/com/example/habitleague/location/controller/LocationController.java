@@ -41,14 +41,21 @@ public class LocationController {
     public ResponseEntity<LocationRegistrationResponse> getRegistrationByChallenge(
             @PathVariable Long challengeId,
             @AuthenticationPrincipal User user) {
+        
+        log.debug("Solicitando ubicación para challenge {} y usuario {}", challengeId, user.getEmail());
+        
         try {
             LocationRegistrationResponse response = 
                     locationRegistrationService.getRegistrationByUserAndChallenge(user.getId(), challengeId);
+            
+            log.debug("Ubicación encontrada para challenge {}: {}", challengeId, response.getLocationName());
             return ResponseEntity.ok(response);
+            
         } catch (ChallengeException e) {
             log.warn("Ubicación no encontrada para challenge {} y usuario {}: {}", 
                     challengeId, user.getEmail(), e.getMessage());
             return ResponseEntity.notFound().build();
+            
         } catch (Exception e) {
             log.error("Error interno obteniendo ubicación registrada para challenge {} y usuario {}: {}", 
                     challengeId, user.getEmail(), e.getMessage(), e);

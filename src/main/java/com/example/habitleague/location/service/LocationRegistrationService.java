@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -74,13 +75,26 @@ public class LocationRegistrationService {
 
     @Transactional(readOnly = true)
     public LocationRegistrationResponse getRegistrationByUserAndChallenge(Long userId, Long challengeId) {
+        log.debug("Buscando ubicación registrada para usuario {} y challenge {}", userId, challengeId);
+        
         try {
-            RegisteredLocation location = registeredLocationRepository
-                    .findByUserIdAndChallengeId(userId, challengeId)
-                    .orElseThrow(() -> new ChallengeException("Ubicación registrada no encontrada"));
+            // Verificar si existe la ubicación
+            Optional<RegisteredLocation> locationOpt = registeredLocationRepository
+                    .findByUserIdAndChallengeId(userId, challengeId);
+            
+            if (locationOpt.isEmpty()) {
+                log.warn("No se encontró ubicación registrada para usuario {} y challenge {}", userId, challengeId);
+                throw new ChallengeException("Ubicación registrada no encontrada");
+            }
+            
+            RegisteredLocation location = locationOpt.get();
+            log.debug("Ubicación encontrada con ID: {}", location.getId());
+            
             return convertToResponse(location);
+            
         } catch (ChallengeException e) {
             // Re-lanzar ChallengeException para manejo específico en el controlador
+            log.warn("ChallengeException al obtener ubicación: {}", e.getMessage());
             throw e;
         } catch (Exception e) {
             // Log del error y re-lanzar como ChallengeException para consistencia
